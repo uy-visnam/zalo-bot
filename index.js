@@ -1,37 +1,45 @@
 require('dotenv').config();
 const express = require('express');
-const { Bot } = require('zalo-bot-js');
+const axios = require('axios');
 
 const app = express();
 app.use(express.json());
 
 const ZALO_TOKEN = process.env.ZALO_TOKEN;
 const CHAT_ID = process.env.CHAT_ID;
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 
-const bot = new Bot({ token: ZALO_TOKEN });
+const ZALO_API = `https://bot-api.zaloplatforms.com/bot${ZALO_TOKEN}`;
 
 app.post('/diawi-callback', async (req, res) => {
     try {
         const data = req.body;
-        console.log('Diawi callback:', data);
+        console.log('📥 Diawi callback:', data);
 
-        if (data.status === 2000 && data.link) {  // Upload thành công
-            const message = `✅ Build mới đã sẵn sàng!\n` +
-                `🔗 Link: ${data.link}\n` +
-                `📝 Comment: ${data.comment || 'Không có'}\n` +
-                `📱 File: ${data.filename || ''}`;
+        if (data.link) {
+            const message = `✅ **Build mới thành công!**\n\n` +
+                `📱 App: ${data.application?.name || 'OneCare Dev'}\n` +
+                `🔢 Version: ${data.application?.version || ''}\n` +
+                `🔗 Link cài đặt: ${data.link}`;
+            // `🕒 ${new Date().toLocaleString('vi-VN')}`;
 
-            await bot.sendMessage(CHAT_ID, message);
-        } else if (data.status !== 2000) {
-            await bot.sendMessage(CHAT_ID, `❌ Upload Diawi thất bại: ${JSON.stringify(data)}`);
+            await axios.post(`${ZALO_API}/sendMessage`, {
+                chat_id: CHAT_ID,
+                // text: message,
+                text: `🔗 Link cài đặt: ${data.link}`
+            });
+
+            console.log('✅ Đã gửi thông báo Zalo');
         }
 
-        res.status(200).send('OK');
+        res.status(200).send({ status: 'OK' });
     } catch (err) {
-        console.error(err);
-        res.status(500).send('Error');
+        console.error('❌ Lỗi:', err.message);
+        res.status(500).send({ error: err.message });
     }
 });
 
-app.listen(PORT, () => console.log(`Webhook server running on port ${PORT}`));
+app.listen(PORT, () => {
+    console.log(`🚀 Server chạy trên port ${PORT}`);
+    console.log(`ZALO_TOKEN: ${ZALO_TOKEN ? '✅ Có' : '❌ Không có'}`);
+});
