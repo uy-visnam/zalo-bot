@@ -35,24 +35,36 @@ async function sendTelegram(message) {
 app.post('/diawi-callback', async (req, res) => {
   try {
     const data = req.body;
+    const platform = req.query.platform || 'unknown';
+
     console.log('📥 Diawi callback:', data);
 
     if (data.link) {
-      const message = `✅ **Build mới thành công!**\n\n` +
-        `📱 App: ${data.application?.name || 'OneCare Dev'}\n` +
-        `🔢 Version: ${data.application?.version || ''}\n` +
-        `🔗 Link cài đặt: ${data.link}`;
-      // `🕒 ${new Date().toLocaleString('vi-VN')}`;
+      const platformName =
+        platform === 'android'
+          ? 'Android'
+          : platform === 'ios'
+          ? 'iOS'
+          : platform;
 
-      await sendTelegram(`🔗 Link cài đặt: ${data.link}`);
+      const appName = data.application?.name || 'OneCare Dev';
+      const version = data.application?.version || '';
 
-      console.log('✅ Đã gửi thông báo Zalo');
+      const message =
+        `✅ Build ${platformName} thành công!\n\n` +
+        `📱 App: ${appName}\n` +
+        `🔢 Version: ${version}\n` +
+        `🔗 Link cài đặt ${platformName}: ${data.link}`;
+
+      await sendTelegram(message);
+
+      console.log(`✅ Đã gửi thông báo ${platformName}`);
     }
 
-    res.status(200).send({ status: 'OK' });
+    res.status(200).json({ status: 'OK' });
   } catch (err) {
     console.error('❌ Lỗi:', err.message);
-    res.status(500).send({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 
