@@ -47,7 +47,7 @@ app.post('/diawi-callback', async (req, res) => {
           ? 'iOS'
           : platform;
 
-      const iconApp = platform === 'android' ? '🤖' : 📱';
+      const iconApp = platform === 'android' ? '🤖' : '📱';
       const appName = data.application?.name || 'OneCare Dev';
       const version = data.application?.version || '';
 
