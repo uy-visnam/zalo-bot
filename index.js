@@ -47,12 +47,13 @@ app.post('/diawi-callback', async (req, res) => {
           ? 'iOS'
           : platform;
 
+      const iconApp = platform === 'android' ? '🤖' : 📱';
       const appName = data.application?.name || 'OneCare Dev';
       const version = data.application?.version || '';
 
       const message =
         `✅ Build ${platformName} thành công!\n\n` +
-        `📱 App: ${appName}\n` +
+        `${iconApp} App: ${appName}\n` +
         `🔢 Version: ${version}\n` +
         `🔗 Link cài đặt ${platformName}: ${data.link}`;
 
